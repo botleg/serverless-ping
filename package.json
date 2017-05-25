@@ -1,0 +1,8 @@
+{
+  "name": "serverless-ping",
+  "dependencies": {
+    "aws-sdk": "^2.55.0",
+    "bluebird": "^3.5.0",
+    "tcp-ping": "^0.1.1"
+  }
+}

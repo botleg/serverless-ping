@@ -1,0 +1,43 @@
+service: ServerlessPing
+custom: ${file(env.yml)}
+
+provider:
+  name: aws
+  stage: dev
+  runtime: nodejs6.10
+  region: us-west-2
+  environment: ${file(env.yml)}
+  iamRoleStatements:
+    - Effect: 'Allow'
+      Action: 'SNS:Publish'
+      Resource:
+        Fn::Join:
+          - ':'
+          - - 'arn:aws:sns'
+            - Ref: 'AWS::Region'
+            - Ref: 'AWS::AccountId'
+            - ${self:custom.TOPIC_NAME}
+    - Effect: 'Allow'
+      Action: 'S3:PutObject'
+      Resource:
+        Fn::Join:
+          - ''
+          - - 'arn:aws:s3:::'
+            - ${self:custom.BUCKET_NAME}
+            - '/*'
+
+functions:
+  list:
+    handler: list.handler
+
+  ping:
+    handler: ping.handler
+    events:
+      - sns: ${self:custom.TOPIC_NAME}
+
+resources:
+  Resources:
+    PingBucket:
+      Type: AWS::S3::Bucket
+      Properties:
+        BucketName: ${self:custom.BUCKET_NAME}
